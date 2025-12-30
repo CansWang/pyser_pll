@@ -182,11 +182,11 @@ def extract_bin_from_hex_string(hex_string):
     return ext_bin_readback
 
 
-def form_sent_string(scan_enable, scan_bypass, mscan_header, sub_chain_control_bits, sub_scan_data_bits, ):
+def form_sent_string(scan_enable, scan_bypass, mscan_header, sub_chain_control_bits, sub_scan_data_bits):
     """form the full mscan string to be sent out and return as hex data string"""
     scan_complete = mscan_header + sub_chain_control_bits + sub_scan_data_bits
     scan_complete_str, last_byte_offset = binary_to_string_safe(scan_complete[::-1])
-    control_byte = form_control_byte(scan_enable, scan_bypass, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable, scan_bypass, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     full_sent_string = control_byte_hex + scan_complete_str
@@ -211,9 +211,9 @@ mscan_complete = update_mscan_complete("glb")
 # print("mscan_complete: ", mscan_complete)
 
 # glb scan reg_bits definition
-CLKF_bits =         reg_bits( '0' * 21 + '1' * 5 + '0' * 28, 54, 'bin') # 54 bits
+CLKF_bits =         reg_bits( '0' * 16 + '01000' + '0000100000' + '0' * 23, 54, 'bin') # 54 bits
 CLKHD_bits =        reg_bits('3', 2, 'dec') # 2 bits
-CLKOD_bits =        reg_bits('16', 11, 'dec') # 11 bits
+CLKOD_bits =        reg_bits('1', 11, 'dec') # 11 bits
 PWRDN_bits = reg_bits('0', 1, 'dec') # 1 bit
 BYPASS_bits = reg_bits('0', 1, 'dec') # 1 bit
 BYPASS_NLK_ENB_bits = reg_bits('0', 1, 'dec') # 1 bit
@@ -221,10 +221,10 @@ TEST_MODE_bits = reg_bits('0', 1, 'dec') # 1 bit
 TESTSEL_bits = reg_bits('0', 3, 'dec') # 3 bits
 LOWFNACC_bits = reg_bits('0', 1, 'dec')
 NOFNACC_bits = reg_bits('0', 1, 'dec')
-PGAIN_LGMLT_bits = reg_bits('5', 6, 'dec')
-IGAIN_LGMLT_bits = reg_bits('1', 6, 'dec')
-IPGAIN_LGMLT_bits = reg_bits('5', 6, 'dec')
-IIGAIN_LGMLT_bits = reg_bits('1', 6, 'dec')
+PGAIN_LGMLT_bits = reg_bits('1', 6, 'dec')
+IGAIN_LGMLT_bits = reg_bits('111011', 6, 'bin')
+IPGAIN_LGMLT_bits = reg_bits('1', 6, 'dec')
+IIGAIN_LGMLT_bits = reg_bits('111011', 6, 'bin')
 IBW_NLK_ENB_bits = reg_bits('1', 1, 'dec')
 LOCK_TYPE_bits = reg_bits('0', 1, 'dec')
 LOCK_SEL_bits = reg_bits('8', 4, 'dec')
@@ -386,67 +386,123 @@ print("the length of glb_complete_reset: ", len(glb_complete_reset))
 # config scan chain bits
 
 # grab the cut and pasted content, identify the variable name and bit length, format default value assignment in the string, ignore + signs
-config_en_alpha_dynb =          reg_bits('0',   1,    'dec')
+config_en_alpha_dynb =          reg_bits('1',   1,    'dec')
 config_byp_rs_en =              reg_bits('1',   1,    'dec')
 sync_load =                     reg_bits('1',   1,    'dec')
-config_gm_log_en =              reg_bits('1',   1,    'dec') 
+config_gm_log_en =              reg_bits('0',   1,    'dec') 
 config_fixed_zt_en =            reg_bits('0',   1,    'dec')
 en_roundup =                    reg_bits('1',   1,    'dec')
 config_gm_log_int_init_en =     reg_bits('1',   1,    'dec')
 config_fp_len_en =              reg_bits('1',   1,    'dec')
-config_bwr_max_lg =             reg_bits('0',   11,   'dec') # 11 bits double check the default value ??????
+config_bwr_max_lg =             reg_bits('10',   11,   'dec') # 11 bits double check the default value ??????
 # print(len(config_bwr_max_lg))     
-config_bwr_lg =                 reg_bits('0',   11,   'dec') # 11 bits double check the default value ??????
-config_alphars_norm =           reg_bits('32',   11,   'dec') # 11 bits double check the default value ??????
-config_alphars_pert =           reg_bits('32',   11,   'dec') # 11 bits double check the default value ??????
+config_bwr_lg =                 reg_bits('10',   11,   'dec') # 11 bits double check the default value ??????
+config_alphars_norm =           reg_bits('20',   11,   'dec') # 11 bits double check the default value ??????
+config_alphars_pert =           reg_bits('20',   11,   'dec') # 11 bits double check the default value ??????
 # print(config_alphars_norm.binary_str) 
-config_fp_len =                 reg_bits('0',   7,    'dec') # 7 bits double check the default value ??????
-config_gm_log_int_init =        reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_gm_log_int =             reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_gmlg_maxint =            reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
+config_fp_len =                 reg_bits('22',   7,    'dec') # 7 bits double check the default value ??????
+config_gm_log_int_init =        reg_bits('50',   7,    'dec') # 7 bit double check the default value ??????
+config_gm_log_int =             reg_bits('25',   7,    'dec') # 7 bit double check the default value ??????
+config_gmlg_maxint =            reg_bits('52',   7,    'dec') # 7 bit double check the default value ??????
 config_gmlg_minint =            reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_fi_log =                 reg_bits('0',   16,   'dec') # 16 bits double check the default value ??????
-config_fd_log =                 reg_bits('0',   16,   'dec') # 16 bits double check the default value ??????
-config_fullbw_gm_lg =           reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
-config_fullbw_gm_lg_offset =    reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
-config_rs_cnt_thres_dft =       reg_bits('0',   18,   'dec')  # 8 bit double check the default value ??????
+config_fi_log =                 reg_bits('128',   16,   'dec') # 16 bits double check the default value ??????
+config_fd_log =                 reg_bits('2048',   16,   'dec') # 16 bits double check the default value ??????
+config_fullbw_gm_lg =           reg_bits('32',   8,    'dec') # 8 bit double check the default value ??????
+config_fullbw_gm_lg_offset =    reg_bits('4',   8,    'dec') # 8 bit double check the default value ??????
+config_rs_cnt_thres_dft =       reg_bits('127',   18,   'dec')  # 8 bit double check the default value ??????
 config_rs_init =                reg_bits('0',   8,    'dec')  # 8 bit double check the default value ??????
-config_rs_dec =                 reg_bits('0',   8,    'dec')   # 8 bit double check the default value ??????
-config_rs_inc =                 reg_bits('0',   8,    'dec')   # 8 bit double check the default value ??????
-config_rs_max =                 reg_bits('0',   8,    'dec')   # 8 bit double check the default value ??????
+config_rs_dec =                 reg_bits('1',   8,    'dec')   # 8 bit double check the default value ??????
+config_rs_inc =                 reg_bits('1',   8,    'dec')   # 8 bit double check the default value ??????
+config_rs_max =                 reg_bits('11',   8,    'dec')   # 8 bit double check the default value ??????
 config_rs_min =                 reg_bits('0',   8,    'dec')   # 8 bit double check the default value ??????
-config_rs_val =                 reg_bits('0',   8,    'dec')   # 8 bit double check the default value ??????
+config_rs_val =                 reg_bits('15',   8,    'dec')   # 8 bit double check the default value ??????
 config_fixed_zt =               reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_zt_max =                 reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_ifcw_init_lg =           reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_slip_halt_threslg =      reg_bits('0',   4,    'dec') # 4 bit double check the default value ??????
-config_prop_init =              reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_cnst_max_iupd =          reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_cnst_min_iupd =          reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_cnst_max_pupd =          reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_cnst_min_pupd =          reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_cnst_max_slip_iupd =     reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_fp_len_slip =            reg_bits('0',   7,    'dec')  # 7 bit double check the default value ??????
-config_lpfltr_dly =             reg_bits('0',   8,    'dec')  # 8 bit double check the default value ??????
-config_slip_guard =             reg_bits('0',   7,    'dec')  # 7 bit double check the default value ??????
-config_slip_guard_iupd =        reg_bits('0',   7,    'dec')      # 7 bit double check the default value ??????
-config_cnst_nominal_nf_lg =     reg_bits('0',   6,    'dec')  # 6 bit double check the default value ??????
-config_snapshot_cnt_thres =     reg_bits('0',   13,   'dec') # 13 bit double check the default value ??????
+config_zt_max =                 reg_bits('5',   7,    'dec') # 7 bit double check the default value ??????
+config_ifcw_init_lg =           reg_bits('5',   7,    'dec') # 7 bit double check the default value ??????
+config_slip_halt_threslg =      reg_bits('6',   4,    'dec') # 4 bit double check the default value ??????
+config_prop_init =              reg_bits('30',   7,    'dec') # 7 bit double check the default value ??????
+config_cnst_max_iupd =          reg_bits('38',   7,    'dec') # 7 bit double check the default value ??????
+config_cnst_min_iupd =          reg_bits('1',   7,    'dec') # 7 bit double check the default value ??????
+config_cnst_max_pupd =          reg_bits('41',   7,    'dec') # 7 bit double check the default value ??????
+config_cnst_min_pupd =          reg_bits('1',   7,    'dec') # 7 bit double check the default value ??????
+config_cnst_max_slip_iupd =     reg_bits('45',   7,    'dec') # 7 bit double check the default value ??????
+config_fp_len_slip =            reg_bits('22',   7,    'dec')  # 7 bit double check the default value ??????
+config_lpfltr_dly =             reg_bits('8',   8,    'dec')  # 8 bit double check the default value ??????
+config_slip_guard =             reg_bits('127',   7,    'dec')  # 7 bit double check the default value ??????
+config_slip_guard_iupd =        reg_bits('1',   7,    'dec')      # 7 bit double check the default value ??????
+config_cnst_nominal_nf_lg =     reg_bits('4',   6,    'dec')  # 6 bit double check the default value ??????
+config_snapshot_cnt_thres =     reg_bits('8188',   13,   'dec') # 13 bit double check the default value ??????
 rs_mask_en =                    reg_bits('0',   1,    'dec')
-rs_settling_plateau_en =        reg_bits('0',   1,    'dec')
-config_rs_mask =                reg_bits('0',   8,    'dec')  # 8 bit double check the default value ??????
-config_slip_rs_reset_en =       reg_bits('0',   1,    'dec')
-config_rs_reset_threshold =     reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
-config_rs_settling_plateau =    reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
-config_ip_diff =                reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_rs_sp_state_code =       reg_bits('0',   6,    'dec') # 6 bit double check the default value ??????
-config_rs_sp_mask =             reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
-config_rs_mask_sval =           reg_bits('0',   8,    'dec') # 8 bit double check the default value ??????
+rs_settling_plateau_en =        reg_bits('1',   1,    'dec')
+config_rs_mask =                reg_bits('3',   8,    'dec')  # 8 bit double check the default value ??????
+config_slip_rs_reset_en =       reg_bits('1',   1,    'dec')
+config_rs_reset_threshold =     reg_bits('8',   8,    'dec') # 8 bit double check the default value ??????
+config_rs_settling_plateau =    reg_bits('11',   8,    'dec') # 8 bit double check the default value ??????
+config_ip_diff =                reg_bits('1',   7,    'dec') # 7 bit double check the default value ??????
+config_rs_sp_state_code =       reg_bits('32',   6,    'dec') # 6 bit double check the default value ??????
+config_rs_sp_mask =             reg_bits('4',   8,    'dec') # 8 bit double check the default value ??????
+config_rs_mask_sval =           reg_bits('8',   8,    'dec') # 8 bit double check the default value ??????
 
 # concat config reg bits
 config_complete = config_en_alpha_dynb.binary_str + \
 config_byp_rs_en.binary_str + \
 sync_load.binary_str + \
+config_gm_log_en.binary_str + \
+config_fixed_zt_en.binary_str + \
+en_roundup.binary_str + \
+config_gm_log_int_init_en.binary_str + \
+config_fp_len_en.binary_str + \
+config_bwr_max_lg.binary_str + \
+config_bwr_lg.binary_str + \
+config_alphars_norm.binary_str + \
+config_alphars_pert.binary_str + \
+config_fp_len.binary_str + \
+config_gm_log_int_init.binary_str + \
+config_gm_log_int.binary_str + \
+config_gmlg_maxint.binary_str + \
+config_gmlg_minint.binary_str + \
+config_fi_log.binary_str + \
+config_fd_log.binary_str + \
+config_fullbw_gm_lg.binary_str + \
+config_fullbw_gm_lg_offset.binary_str + \
+config_rs_cnt_thres_dft.binary_str + \
+config_rs_init.binary_str + \
+config_rs_dec.binary_str + \
+config_rs_inc.binary_str + \
+config_rs_max.binary_str + \
+config_rs_min.binary_str + \
+config_rs_val.binary_str + \
+config_fixed_zt.binary_str + \
+config_zt_max.binary_str + \
+config_ifcw_init_lg.binary_str + \
+config_slip_halt_threslg.binary_str + \
+config_prop_init.binary_str + \
+config_cnst_max_iupd.binary_str + \
+config_cnst_min_iupd.binary_str + \
+config_cnst_max_pupd.binary_str + \
+config_cnst_min_pupd.binary_str + \
+config_cnst_max_slip_iupd.binary_str + \
+config_fp_len_slip.binary_str + \
+config_lpfltr_dly.binary_str + \
+config_slip_guard.binary_str + \
+config_slip_guard_iupd.binary_str + \
+config_cnst_nominal_nf_lg.binary_str + \
+config_snapshot_cnt_thres.binary_str + \
+rs_mask_en.binary_str + \
+rs_settling_plateau_en.binary_str + \
+config_rs_mask.binary_str + \
+config_slip_rs_reset_en.binary_str + \
+config_rs_reset_threshold.binary_str + \
+config_rs_settling_plateau.binary_str + \
+config_ip_diff.binary_str + \
+config_rs_sp_state_code.binary_str + \
+config_rs_sp_mask.binary_str + \
+config_rs_mask_sval.binary_str
+print("config_complete length: ", len(config_complete))
+
+config_complete_reset = config_en_alpha_dynb.binary_str + \
+config_byp_rs_en.binary_str + \
+'0' + \
 config_gm_log_en.binary_str + \
 config_fixed_zt_en.binary_str + \
 en_roundup.binary_str + \
@@ -523,7 +579,9 @@ scan_out_zt.binary_str
 
 # fcw scan reg_bits definition
 # fcw_scan = reg_bits( '011'+ '11' + '11111'  + '1' * 31, 41, 'bin', inv=True) # 41 bits
-fcw_scan = reg_bits( '1' * 31 + '11111' + 5 * '1', 41, 'bin', inv=False) # 41 bits
+# fcw_scan = reg_bits( '0' * 31 + '00000' + '00000', 41, 'bin', inv=False) # 41 bits
+fcw_scan = reg_bits( '1' * 41 , 41, 'bin', inv=False) # 41 bits
+
 
 print("fcw_scan length: ", len(fcw_scan.binary_str))
 
@@ -541,6 +599,8 @@ prop_upd0.binary_str + \
 gm_log_int_ff.binary_str + \
 rs_ff.binary_str + \
 scan_out_zt.binary_str
+
+scanread_complete = '10' * 122
 
 print("scanread_complete length: ", len(scanread_complete))
 # concat
@@ -574,13 +634,43 @@ control_stream = "00110001" + "01010100" + "000"
 # control_stream = "00110101" + "01010101"+ "010" 
 # control_stream = "01111101" * 15
 
-
+def hex_to_binary(hex_string, pad_zeros=False):
+    """
+    Convert hex string to binary string.
+    
+    Parameters:
+    hex_string (str): Input hex string
+    pad_zeros (bool): If True, pad with leading zeros to full width
+    
+    Returns:
+    str: Binary string representation
+    """
+    try:
+        # Remove any '0x' prefix if present
+        if hex_string.startswith(('0x', '0X')):
+            hex_string = hex_string[2:]
+        
+        if pad_zeros:
+            # Pad to full width (each hex digit = 4 bits)
+            num_bits = len(hex_string) * 4
+            binary_string = format(int(hex_string, 16), f'0{num_bits}b')
+        else:
+            # Convert without padding (no leading zeros)
+            binary_string = format(int(hex_string, 16), 'b')
+        
+        return binary_string
+    
+    except ValueError as e:
+        raise ValueError(f"Invalid hex string: {hex_string}") from e
 
 
 def select_subchain(mscan_sel, mode=False):
     # select and update sub chain strings
     if (mscan_sel == "config"):
-        return config_complete
+        if (mode == "reset"):
+            return config_complete_reset
+        else:
+            return config_complete
     elif (mscan_sel == "fcw"):
         return fcw_scan.binary_str
     elif (mscan_sel == "readscan"):
@@ -630,10 +720,13 @@ def change_test_var_to_zero():
 
 # control byte, forming 
 
-def form_control_byte(scan_enable, scan_bypass, last_byte_offset): # add other control bits later if needed
+def form_control_byte(scan_enable, scan_bypass, num_of_bits): # add other control bits later if needed
     control_byte = ''
+    if (num_of_bits > 1024):
+        print("Error: num_of_bits exceeds 1024 bits limit.")
+        return None
     # the first four bits are reserved for last byte offset
-    control_byte += format(last_byte_offset, '04b')
+    control_byte += format(num_of_bits, '012b')
     control_byte += '00'
     # scan_enable bit
     if scan_enable:
@@ -698,7 +791,7 @@ def binary_to_string_safe(binary_string):
     try:
         # Remove any spaces or non-binary characters
         clean_binary = ''.join(filter(lambda x: x in '01', binary_string))
-        
+        len_binary = len(clean_binary)
         # Ensure length is multiple of 8
         if len(clean_binary) % 8 != 0:
             # print(f"Warning: Binary string length ({len(clean_binary)}) is not multiple of 8")
@@ -715,7 +808,7 @@ def binary_to_string_safe(binary_string):
         # print("Converted string (hex): ", result, ", Write complete!")
 
                                                   
-        return result, last_byte_offset
+        return result, len_binary
     except ValueError as e:
         print(f"Error: Invalid binary string - {e}")
         return None
@@ -844,7 +937,11 @@ class AdvancedMicroBlazeComm:
             
             self.ser.write(data_sent)
             print("Hex string sent: ", data_sent.hex(), ", Write complete!")
-            self.ser.write('\r'.encode('utf-8'))  # send newline to indicate end of transmission
+            # print('\r'.encode('utf-8').hex())
+            # self.ser.write('\r\r'.encode('utf-8'))  # send newline to indicate end of transmission
+            # self.ser.write('\r'.encode('utf-8'))  # send newline to indicate end of transmission
+            # self.ser.write('\r'.encode('utf-8'))  # send newline to indicate end of transmission
+            # self.ser.write('\r'.encode('utf-8'))  # send newline to indicate end of transmission
             
             # Log sent data
             timestamp = datetime.now().strftime('%H:%M:%S.%f')[:-3]
@@ -939,6 +1036,7 @@ def wait_for_microblaze_ready(obj):
     while ("ready".encode('utf-8').hex() not in mb_ready_str):
         read_data, remaining = obj.read_until_sequence(terminator="\n\r\n\r", timeout=1000000, format="hex")
         mb_ready_str += read_data
+        # print(mb_ready_str)
     # print("\n\n\n")
     print("The received string is: " + mb_ready_str)
     # print("\n\n\n")
@@ -955,7 +1053,7 @@ def toggle_latch(obj, scan_byp, current_scan_chain_data, last_byte_offset): # wr
         # wait for the 
         # wait_for_microblaze_ready(obj)
         # 1 set enable for the first time
-        control_byte = form_control_byte(scan_enable=0, scan_bypass=scan_byp, last_byte_offset=last_byte_offset)
+        control_byte = form_control_byte(scan_enable=0, scan_bypass=scan_byp, num_of_bits=last_byte_offset)
         control_byte_ascii = ''.join(chr(int(control_byte, 2)))
         control_byte_hex, _ = binary_to_string_safe(control_byte)
         # print("Current scan chain data : ", current_scan_chain_data)
@@ -969,7 +1067,7 @@ def toggle_latch(obj, scan_byp, current_scan_chain_data, last_byte_offset): # wr
         # 2 set enable to 0 for latch to be transparent
         wait_for_microblaze_ready(obj)
 
-        control_byte = form_control_byte(scan_enable=1, scan_bypass=scan_byp, last_byte_offset=last_byte_offset)
+        control_byte = form_control_byte(scan_enable=1, scan_bypass=scan_byp, num_of_bits=last_byte_offset)
         control_byte_ascii = ''.join(chr(int(control_byte, 2)))
         control_byte_hex, _ = binary_to_string_safe(control_byte)
 
@@ -980,7 +1078,7 @@ def toggle_latch(obj, scan_byp, current_scan_chain_data, last_byte_offset): # wr
 
         # 3 set enable to 1 for latch to hold the data
         wait_for_microblaze_ready(obj)
-        control_byte = form_control_byte(scan_enable=0, scan_bypass=scan_byp, last_byte_offset=last_byte_offset)
+        control_byte = form_control_byte(scan_enable=0, scan_bypass=scan_byp, num_of_bits=last_byte_offset)
         control_byte_ascii = ''.join(chr(int(control_byte, 2)))
         control_byte_hex, _ = binary_to_string_safe(control_byte)
 
@@ -1002,7 +1100,7 @@ def write_scan_chain(obj, scan_byp, current_scan_chain_data, last_byte_offset):
         # wait for the 
         wait_for_microblaze_ready(obj)
         # send the data
-        control_byte = form_control_byte(scan_enable=1, scan_bypass=scan_byp, last_byte_offset=last_byte_offset)
+        control_byte = form_control_byte(scan_enable=1, scan_bypass=scan_byp, num_of_bits=last_byte_offset)
         sent_string = control_byte + current_scan_chain_data
         obj.send_data(sent_string)
         print("Scan chain data sent successfully.")
@@ -1015,7 +1113,7 @@ def write_scan_chain(obj, scan_byp, current_scan_chain_data, last_byte_offset):
 # might need a dedicated bypass writer function both in python and microblaze controller
 
 def mscan_en_bypass_writer(obj, scan_enable, scan_bypass):
-    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, last_byte_offset=0)
+    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=0)
     control_byte_hex, num = binary_to_string_safe(control_byte)
     sent_string = control_byte_hex 
     obj.send_data(sent_string)
@@ -1069,7 +1167,7 @@ def mscan_write(obj, mscan_sel, glb_control_bits="001", config_control_bits="001
     # first write into the mscan chain with bypass=1 and en=0
     # scan_enable = 0 means the output latch is latching
     # bypass = 1 means only the mscan chain is active
-    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     
@@ -1084,7 +1182,7 @@ def mscan_write(obj, mscan_sel, glb_control_bits="001", config_control_bits="001
 
     wait_for_microblaze_ready(obj)
 
-    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     
@@ -1095,7 +1193,7 @@ def mscan_write(obj, mscan_sel, glb_control_bits="001", config_control_bits="001
 
     wait_for_microblaze_ready(obj)
 
-    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     
@@ -1182,7 +1280,7 @@ def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_b
     obj.send_data(sent_string)
     wait_for_microblaze_ready(obj)  
 
-    # toggle mscan enable
+    # # toggle mscan enable
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
     mscan_en_bypass_writer(obj, scan_enable=1, scan_bypass=1)
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
@@ -1216,6 +1314,7 @@ def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bit
 
     # test, delete later
     mscan_complete = mscan_sel_bits + sub_chain_control_bits
+    print("mscan_complete length: ", len(mscan_complete))
     mscan_complete_ascii, last_byte_offset = binary_to_string_safe(mscan_complete[::-1])
     # print("mscan_complete_binary is:" + repr(mscan_complete))   
 
@@ -1223,7 +1322,7 @@ def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bit
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
 
     # generate control byte with bypass=1 and en=0 since we are only writing the scan chain
-    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     sent_string = control_byte_hex + mscan_complete_ascii
@@ -1306,7 +1405,7 @@ def toggle_scan_load(obj, mscan_sel, glb_control_bits="001", config_control_bits
     mscan_complete_loadzero = mscan_sel_bits + sub_chain_control_bits_loadzero
     mscan_complete_ascii_loadzero, last_byte_offset = binary_to_string_safe(mscan_complete_loadzero[::-1])
 
-    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)
 
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
@@ -1320,7 +1419,7 @@ def toggle_scan_load(obj, mscan_sel, glb_control_bits="001", config_control_bits
     mscan_complete_loadone = mscan_sel_bits + sub_chain_control_bits_loadone
     mscan_complete_ascii_loadone, last_byte_offset = binary_to_string_safe(mscan_complete_loadone[::-1])
 
-    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)
     control_byte_hex, num = binary_to_string_safe(control_byte)
     sent_string = control_byte_hex + mscan_complete_ascii_loadone
     obj.send_data(sent_string)
@@ -1330,13 +1429,155 @@ def toggle_scan_load(obj, mscan_sel, glb_control_bits="001", config_control_bits
     mscan_complete_loadzero = mscan_sel_bits + sub_chain_control_bits_loadzero
     mscan_complete_ascii_loadzero, last_byte_offset = binary_to_string_safe(mscan_complete_loadzero[::-1])
 
-    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, last_byte_offset=last_byte_offset)
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)
 
     control_byte_hex, num = binary_to_string_safe(control_byte)
 
     sent_string = control_byte_hex + mscan_complete_ascii_loadzero
     obj.send_data(sent_string)  
     wait_for_microblaze_ready(obj)
+
+def decode_readout_bits(hex_string):
+    bin_str = hex_to_binary(hex_string)
+
+    bin_str_len = len(bin_str)
+    print("Length of the decoded binary string: " + str(bin_str_len))
+
+    bin_str_inv = bin_str[::-1]
+    full_eavg = 268435456
+    mscan_control = bin_str_inv[1:20]
+    print("Decoded MSCAN control bits: " + mscan_control)
+    print("Length of MSCAN control bits: " + str(len(mscan_control)))
+    chip_id = bin_str_inv[20:30] 
+    print("Decoded Chip ID bits: " + chip_id)
+    print("Length of Chip ID bits: " + str(len(chip_id)))
+    full_fcw = bin_str_inv[30:82]
+    print("Decoded Full FCW bits: " + full_fcw)
+    print("Length of Full FCW bits: " + str(len(full_fcw)))
+    eavg_normal = bin_str_inv[82:110]
+    print("Decoded EAVG Normal bits: " + eavg_normal)
+    print("Length of EAVG Normal bits: " + str(len(eavg_normal)))
+    print("percentage value of EAVG Normal: " + str(int(eavg_normal, 2) / full_eavg * 100) + "%")
+    eavg_perturb = bin_str_inv[110:138]
+    print("Decoded EAVG Perturb bits: " + eavg_perturb)
+    print("Length of EAVG Perturb bits: " + str(len(eavg_perturb)))
+    print("percentage value of EAVG Perturb: " + str(int(eavg_perturb, 2) / full_eavg * 100) + "%")
+    int_upd0 = bin_str_inv[138:190]
+    print("Decoded INT UPD0 bits: " + int_upd0)
+    print("Length of INT UPD0 bits: " + str(len(int_upd0)))
+    prop_upd0 = bin_str_inv[190:242]
+    print("Decoded PROP UPD0 bits: " + prop_upd0)   
+    print("Length of PROP UPD0 bits: " + str(len(prop_upd0)))
+    gm_log_int_ff = bin_str_inv[242:249]
+    print("Decoded GM LOG INT FF bits: " + gm_log_int_ff)
+    print("Length of GM LOG INT FF bits: " + str(len(gm_log_int_ff)))
+    rs_ff = bin_str_inv[249:257]
+    print("Decoded RS FF bits: " + rs_ff)
+    print("Length of RS FF bits: " + str(len(rs_ff)))
+    scan_out_zt = bin_str_inv[257:263]
+    print("Decoded SCAN OUT ZT bits: " + scan_out_zt)
+    print("Length of SCAN OUT ZT bits: " + str(len(scan_out_zt)))
+
+
+
+
+
+
+def readout_scan_read(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0"):
+
+    if (mscan_sel == "bypass"):
+        mscan_sel_bits = "00000"
+    elif (mscan_sel == "glb"):
+        mscan_sel_bits = "10000"
+    elif (mscan_sel == "config"):
+        mscan_sel_bits = "00001"
+    elif (mscan_sel == "fcw"):
+        mscan_sel_bits = "00010"
+    elif (mscan_sel == "readout"):
+        mscan_sel_bits = "00100"
+    elif (mscan_sel == "vcal"):
+        mscan_sel_bits = "01000"
+    else:
+        mscan_sel_bits = "00000"
+
+    print("HOST: Performing readout scan read...")
+    # set the bypass signal to be high first
+    mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
+
+    sub_chain_control_bits_scanloadzero = glb_control_bits + config_control_bits + fcw_control_bits + '0' + vcal_control_bits + '0'
+
+    sub_chain_control_bits_scanloadone = glb_control_bits + config_control_bits + fcw_control_bits + '0' + vcal_control_bits + '1'
+
+    mscan_complete_scanloadzero = mscan_sel_bits + sub_chain_control_bits_scanloadzero
+    mscan_complete_ascii_scanloadzero, last_byte_offset = binary_to_string_safe(mscan_complete_scanloadzero[::-1])
+
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)    
+    control_byte_hex, num = binary_to_string_safe(control_byte)
+
+    sent_string = control_byte_hex + mscan_complete_ascii_scanloadzero
+    obj.send_data(sent_string)  
+    wait_for_microblaze_ready(obj)
+
+    toggle_en_mscan(obj)
+
+
+    print("HOST: Scan load bit set to 0, now performing readout...")
+
+    mscan_complete_scanloadone = mscan_sel_bits + sub_chain_control_bits_scanloadone
+    mscan_complete_ascii_scanloadone, last_byte_offset = binary_to_string_safe(mscan_complete_scanloadone[::-1])
+
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=1, num_of_bits=last_byte_offset)    
+    control_byte_hex, num = binary_to_string_safe(control_byte)
+
+    sent_string = control_byte_hex + mscan_complete_ascii_scanloadone
+    obj.send_data(sent_string)  
+    wait_for_microblaze_ready(obj)
+
+    toggle_en_mscan(obj)
+
+    mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=0)
+    print("HOST: Readout scan read performed, scan load bit set back to 0...")
+    sub_chain_control_bits_scanloadzero = glb_control_bits + config_control_bits + fcw_control_bits + '1' + vcal_control_bits + '0'
+    mscan_complete_scanloadzero = mscan_sel_bits + sub_chain_control_bits_scanloadzero
+    mscan_complete_ascii_scanloadzero, last_byte_offset = binary_to_string_safe(mscan_complete_scanloadzero[::-1])
+
+    control_byte = form_control_byte(scan_enable=0, scan_bypass=0, num_of_bits=last_byte_offset)    
+    control_byte_hex, num = binary_to_string_safe(control_byte)
+
+    sent_string = control_byte_hex + mscan_complete_ascii_scanloadzero
+    obj.send_data(sent_string)  
+    wait_for_microblaze_ready(obj)
+
+    toggle_en_mscan(obj)
+
+
+    # readout the loaded data, scanread_complete
+    
+
+    sub_chain_data_bits = scanread_complete
+    mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=0)
+    
+    sent_string = form_sent_string(scan_enable=0, scan_bypass=0, mscan_header=mscan_sel_bits, sub_chain_control_bits=sub_chain_control_bits_scanloadzero, sub_scan_data_bits=sub_chain_data_bits)
+    obj.send_data(sent_string)
+    # read
+    readback_string = wait_for_microblaze_ready(obj)
+    
+    # process 
+    ext_bin_readback = extract_bin_from_hex_string(readback_string)
+    print("HOST: the 1st full readback signal is: " + ext_bin_readback)
+    decode_readout_bits(ext_bin_readback)
+
+    # write again to confirm
+    sent_string = form_sent_string(scan_enable=0, scan_bypass=0, mscan_header=mscan_sel_bits, sub_chain_control_bits=sub_chain_control_bits_scanloadzero, sub_scan_data_bits=sub_chain_data_bits)
+    obj.send_data(sent_string)
+    # read
+    readback_string = wait_for_microblaze_ready(obj)
+    
+    # process 
+    ext_bin_readback = extract_bin_from_hex_string(readback_string)
+    print("HOST: the 2nd full readback signal is: " + ext_bin_readback)
+    decode_readout_bits(ext_bin_readback)
+    mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
 
 
 
@@ -1350,26 +1591,52 @@ if __name__ == "__main__":
 
     if comm.connect(): # connect the uart 
 
-        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", 
-        # vcal_control_bits="000", scan_load_1bit="0", mode="bgpwrdn")
+        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
+
+        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0",  vcal_control_bits="000", scan_load_1bit="0", mode="bgpwrdn")
 
         # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
     
         # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
 
-        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
+        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
 
         # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
 
-        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        # mscan_en_bypass_writer(comm, scan_enable=0, scan_bypass=1)
 
-        # # # mscan_en_bypass_writer(comm, scan_enable=0, scan_bypass=1)
-        # toggle_scan_load(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
 
-        mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        # mscan_en_bypass_writer(comm, scan_enable=0, scan_bypass=1)
+        # mscan_en_bypass_writer(comm, scan_enable=1, scan_bypass=1)
+        # mscan_en_bypass_writer(comm, scan_enable=0, scan_bypass=1)
+
+        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+
         
-        mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
 
+        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
+      
+        mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
+
+        # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        
+        # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
+
+        mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        
+        
+
+        # # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+
+        # time.sleep(10)
+
+        readout_scan_read(comm, mscan_sel="readout", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+
+        # # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        
+        
 
         try:
                     
