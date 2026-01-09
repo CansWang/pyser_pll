@@ -1,3 +1,4 @@
+from unicodedata import name
 import serial
 import time
 import json
@@ -5,6 +6,8 @@ from datetime import datetime
 import threading
 import traceback 
 import re
+import yaml
+import sys
 
 # ser = serial.Serial(
 #     port='COM3',\
@@ -211,7 +214,7 @@ mscan_complete = update_mscan_complete("glb")
 # print("mscan_complete: ", mscan_complete)
 
 # glb scan reg_bits definition
-CLKF_bits =         reg_bits( '0' * 16 + '01000' + '0000100000' + '0' * 23, 54, 'bin') # 54 bits
+CLKF_bits =         reg_bits( '0' * 16 + '01011' + '0000000000' + '0' * 23, 54, 'bin') # 54 bits
 CLKHD_bits =        reg_bits('3', 2, 'dec') # 2 bits
 CLKOD_bits =        reg_bits('1', 11, 'dec') # 11 bits
 PWRDN_bits = reg_bits('0', 1, 'dec') # 1 bit
@@ -256,128 +259,131 @@ MAX_VCO_BIAS_bits = reg_bits('0', 1, 'dec')
 VCOCAL_OFF_bits = reg_bits('11', 5, 'dec')
 
 # concat glb reg bits
+# print("CLKF_bits, non-global: ", CLKF_bits.binary_str)
 glb_complete = CLKF_bits.binary_str + \
-               CLKHD_bits.binary_str + \
-               CLKOD_bits.binary_str + \
-               PWRDN_bits.binary_str + \
-               BYPASS_bits.binary_str + \
-               BYPASS_NLK_ENB_bits.binary_str + \
-               TEST_MODE_bits.binary_str + \
-               TESTSEL_bits.binary_str + \
-               LOWFNACC_bits.binary_str + \
-               NOFNACC_bits.binary_str + \
-               PGAIN_LGMLT_bits.binary_str + \
-               IGAIN_LGMLT_bits.binary_str + \
-               IPGAIN_LGMLT_bits.binary_str + \
-               IIGAIN_LGMLT_bits.binary_str + \
-               IBW_NLK_ENB_bits.binary_str + \
-               LOCK_TYPE_bits.binary_str + \
-               LOCK_SEL_bits.binary_str + \
-               FBSEL_bits.binary_str + \
-               VCOCAL_RDIV_LGFCT_bits.binary_str + \
-               VCOCAL_OFFBYP_bits.binary_str + \
-               VCOCAL_ENB_bits.binary_str + \
-               BIAS_REF_SEL_bits.binary_str + \
-               REG_EXT_SEL1.binary_str + \
-               REG_TEST_SEL1.binary_str + \
-               REG_TEST_REP1.binary_str + \
-               REG_TEST_OUT1.binary_str + \
-               REG_TEST_DRV1.binary_str + \
-               REG_RESET1.binary_str + \
-               REG_PWRDN1.binary_str + \
-               BG_RESET1.binary_str + \
-               BG_PWRDN1.binary_str + \
-               REG_EXT_SEL2.binary_str + \
-               REG_TEST_SEL2.binary_str + \
-               REG_TEST_REP2.binary_str + \
-               REG_TEST_OUT2.binary_str + \
-               REG_TEST_DRV2.binary_str + \
-               REG_RESET2.binary_str + \
-               REG_PWRDN2.binary_str + \
-               BG_RESET2.binary_str + \
-               BG_PWRDN2.binary_str + \
-               RSTFNACC_bits.binary_str + \
-               MAX_VCO_BIAS_bits.binary_str + \
-               VCOCAL_OFF_bits.binary_str
+            CLKHD_bits.binary_str + \
+            CLKOD_bits.binary_str + \
+            PWRDN_bits.binary_str + \
+            BYPASS_bits.binary_str + \
+            BYPASS_NLK_ENB_bits.binary_str + \
+            TEST_MODE_bits.binary_str + \
+            TESTSEL_bits.binary_str + \
+            LOWFNACC_bits.binary_str + \
+            NOFNACC_bits.binary_str + \
+            PGAIN_LGMLT_bits.binary_str + \
+            IGAIN_LGMLT_bits.binary_str + \
+            IPGAIN_LGMLT_bits.binary_str + \
+            IIGAIN_LGMLT_bits.binary_str + \
+            IBW_NLK_ENB_bits.binary_str + \
+            LOCK_TYPE_bits.binary_str + \
+            LOCK_SEL_bits.binary_str + \
+            FBSEL_bits.binary_str + \
+            VCOCAL_RDIV_LGFCT_bits.binary_str + \
+            VCOCAL_OFFBYP_bits.binary_str + \
+            VCOCAL_ENB_bits.binary_str + \
+            BIAS_REF_SEL_bits.binary_str + \
+            REG_EXT_SEL1.binary_str + \
+            REG_TEST_SEL1.binary_str + \
+            REG_TEST_REP1.binary_str + \
+            REG_TEST_OUT1.binary_str + \
+            REG_TEST_DRV1.binary_str + \
+            REG_RESET1.binary_str + \
+            REG_PWRDN1.binary_str + \
+            BG_RESET1.binary_str + \
+            BG_PWRDN1.binary_str + \
+            REG_EXT_SEL2.binary_str + \
+            REG_TEST_SEL2.binary_str + \
+            REG_TEST_REP2.binary_str + \
+            REG_TEST_OUT2.binary_str + \
+            REG_TEST_DRV2.binary_str + \
+            REG_RESET2.binary_str + \
+            REG_PWRDN2.binary_str + \
+            BG_RESET2.binary_str + \
+            BG_PWRDN2.binary_str + \
+            RSTFNACC_bits.binary_str + \
+            MAX_VCO_BIAS_bits.binary_str + \
+            VCOCAL_OFF_bits.binary_str
 print("glb_complete length: ", len(glb_complete)) 
 
+
 glb_complete_reset = CLKF_bits.binary_str + \
-               CLKHD_bits.binary_str + \
-               CLKOD_bits.binary_str + \
-               PWRDN_bits.binary_str + \
-               BYPASS_bits.binary_str + \
-               BYPASS_NLK_ENB_bits.binary_str + \
-               TEST_MODE_bits.binary_str + \
-               TESTSEL_bits.binary_str + \
-               LOWFNACC_bits.binary_str + \
-               NOFNACC_bits.binary_str + \
-               PGAIN_LGMLT_bits.binary_str + \
-               IGAIN_LGMLT_bits.binary_str + \
-               IPGAIN_LGMLT_bits.binary_str + \
-               IIGAIN_LGMLT_bits.binary_str + \
-               IBW_NLK_ENB_bits.binary_str + \
-               LOCK_TYPE_bits.binary_str + \
-               LOCK_SEL_bits.binary_str + \
-               FBSEL_bits.binary_str + \
-               VCOCAL_RDIV_LGFCT_bits.binary_str + \
-               VCOCAL_OFFBYP_bits.binary_str + \
-               VCOCAL_ENB_bits.binary_str + \
-               BIAS_REF_SEL_bits.binary_str + \
-               REG_EXT_SEL1.binary_str + \
-               REG_TEST_SEL1.binary_str + \
-               REG_TEST_REP1.binary_str + \
-               REG_TEST_OUT1.binary_str + \
-               REG_TEST_DRV1.binary_str + \
-               '1000' + \
-               REG_EXT_SEL2.binary_str + \
-               REG_TEST_SEL2.binary_str + \
-               REG_TEST_REP2.binary_str + \
-               REG_TEST_OUT2.binary_str + \
-               REG_TEST_DRV2.binary_str + \
-               '1000' + \
-               RSTFNACC_bits.binary_str + \
-               MAX_VCO_BIAS_bits.binary_str + \
-               VCOCAL_OFF_bits.binary_str
+            CLKHD_bits.binary_str + \
+            CLKOD_bits.binary_str + \
+            PWRDN_bits.binary_str + \
+            BYPASS_bits.binary_str + \
+            BYPASS_NLK_ENB_bits.binary_str + \
+            TEST_MODE_bits.binary_str + \
+            TESTSEL_bits.binary_str + \
+            LOWFNACC_bits.binary_str + \
+            NOFNACC_bits.binary_str + \
+            PGAIN_LGMLT_bits.binary_str + \
+            IGAIN_LGMLT_bits.binary_str + \
+            IPGAIN_LGMLT_bits.binary_str + \
+            IIGAIN_LGMLT_bits.binary_str + \
+            IBW_NLK_ENB_bits.binary_str + \
+            LOCK_TYPE_bits.binary_str + \
+            LOCK_SEL_bits.binary_str + \
+            FBSEL_bits.binary_str + \
+            VCOCAL_RDIV_LGFCT_bits.binary_str + \
+            VCOCAL_OFFBYP_bits.binary_str + \
+            VCOCAL_ENB_bits.binary_str + \
+            BIAS_REF_SEL_bits.binary_str + \
+            REG_EXT_SEL1.binary_str + \
+            REG_TEST_SEL1.binary_str + \
+            REG_TEST_REP1.binary_str + \
+            REG_TEST_OUT1.binary_str + \
+            REG_TEST_DRV1.binary_str + \
+            '1000' + \
+            REG_EXT_SEL2.binary_str + \
+            REG_TEST_SEL2.binary_str + \
+            REG_TEST_REP2.binary_str + \
+            REG_TEST_OUT2.binary_str + \
+            REG_TEST_DRV2.binary_str + \
+            '1000' + \
+            RSTFNACC_bits.binary_str + \
+            MAX_VCO_BIAS_bits.binary_str + \
+            VCOCAL_OFF_bits.binary_str
 
 glb_complete_bgpwrdn = CLKF_bits.binary_str + \
-               CLKHD_bits.binary_str + \
-               CLKOD_bits.binary_str + \
-               PWRDN_bits.binary_str + \
-               BYPASS_bits.binary_str + \
-               BYPASS_NLK_ENB_bits.binary_str + \
-               TEST_MODE_bits.binary_str + \
-               TESTSEL_bits.binary_str + \
-               LOWFNACC_bits.binary_str + \
-               NOFNACC_bits.binary_str + \
-               PGAIN_LGMLT_bits.binary_str + \
-               IGAIN_LGMLT_bits.binary_str + \
-               IPGAIN_LGMLT_bits.binary_str + \
-               IIGAIN_LGMLT_bits.binary_str + \
-               IBW_NLK_ENB_bits.binary_str + \
-               LOCK_TYPE_bits.binary_str + \
-               LOCK_SEL_bits.binary_str + \
-               FBSEL_bits.binary_str + \
-               VCOCAL_RDIV_LGFCT_bits.binary_str + \
-               VCOCAL_OFFBYP_bits.binary_str + \
-               VCOCAL_ENB_bits.binary_str + \
-               BIAS_REF_SEL_bits.binary_str + \
-               REG_EXT_SEL1.binary_str + \
-               REG_TEST_SEL1.binary_str + \
-               REG_TEST_REP1.binary_str + \
-               REG_TEST_OUT1.binary_str + \
-               REG_TEST_DRV1.binary_str + \
-               '0101' + \
-               REG_EXT_SEL2.binary_str + \
-               REG_TEST_SEL2.binary_str + \
-               REG_TEST_REP2.binary_str + \
-               REG_TEST_OUT2.binary_str + \
-               REG_TEST_DRV2.binary_str + \
-               '0101' + \
-               RSTFNACC_bits.binary_str + \
-               MAX_VCO_BIAS_bits.binary_str + \
-               VCOCAL_OFF_bits.binary_str
+            CLKHD_bits.binary_str + \
+            CLKOD_bits.binary_str + \
+            PWRDN_bits.binary_str + \
+            BYPASS_bits.binary_str + \
+            BYPASS_NLK_ENB_bits.binary_str + \
+            TEST_MODE_bits.binary_str + \
+            TESTSEL_bits.binary_str + \
+            LOWFNACC_bits.binary_str + \
+            NOFNACC_bits.binary_str + \
+            PGAIN_LGMLT_bits.binary_str + \
+            IGAIN_LGMLT_bits.binary_str + \
+            IPGAIN_LGMLT_bits.binary_str + \
+            IIGAIN_LGMLT_bits.binary_str + \
+            IBW_NLK_ENB_bits.binary_str + \
+            LOCK_TYPE_bits.binary_str + \
+            LOCK_SEL_bits.binary_str + \
+            FBSEL_bits.binary_str + \
+            VCOCAL_RDIV_LGFCT_bits.binary_str + \
+            VCOCAL_OFFBYP_bits.binary_str + \
+            VCOCAL_ENB_bits.binary_str + \
+            BIAS_REF_SEL_bits.binary_str + \
+            REG_EXT_SEL1.binary_str + \
+            REG_TEST_SEL1.binary_str + \
+            REG_TEST_REP1.binary_str + \
+            REG_TEST_OUT1.binary_str + \
+            REG_TEST_DRV1.binary_str + \
+            '0101' + \
+            REG_EXT_SEL2.binary_str + \
+            REG_TEST_SEL2.binary_str + \
+            REG_TEST_REP2.binary_str + \
+            REG_TEST_OUT2.binary_str + \
+            REG_TEST_DRV2.binary_str + \
+            '0101' + \
+            RSTFNACC_bits.binary_str + \
+            MAX_VCO_BIAS_bits.binary_str + \
+            VCOCAL_OFF_bits.binary_str
         
 
+print("the length of glb_complete: ", len(glb_complete))
 print("the length of glb_complete_reset: ", len(glb_complete_reset))
 
 
@@ -405,7 +411,7 @@ config_gm_log_int_init =        reg_bits('50',   7,    'dec') # 7 bit double che
 config_gm_log_int =             reg_bits('25',   7,    'dec') # 7 bit double check the default value ??????
 config_gmlg_maxint =            reg_bits('52',   7,    'dec') # 7 bit double check the default value ??????
 config_gmlg_minint =            reg_bits('0',   7,    'dec') # 7 bit double check the default value ??????
-config_fi_log =                 reg_bits('128',   16,   'dec') # 16 bits double check the default value ??????
+config_fi_log =                 reg_bits('2048',   16,   'dec') # 16 bits double check the default value ??????
 config_fd_log =                 reg_bits('2048',   16,   'dec') # 16 bits double check the default value ??????
 config_fullbw_gm_lg =           reg_bits('32',   8,    'dec') # 8 bit double check the default value ??????
 config_fullbw_gm_lg_offset =    reg_bits('4',   8,    'dec') # 8 bit double check the default value ??????
@@ -663,6 +669,53 @@ def hex_to_binary(hex_string, pad_zeros=False):
     except ValueError as e:
         raise ValueError(f"Invalid hex string: {hex_string}") from e
 
+# import default value and order list from yaml file
+def load_from_yaml(path):
+    try:
+        with open(path, 'r') as file:
+            data = yaml.safe_load(file)
+            order_list = data.get('concat_order', [])
+            default_values = data.get('default_values', {})
+            bits_lengths = data.get('bits_length', {})
+            default_formats = data.get('default_format', {})
+            return order_list, default_values, bits_lengths, default_formats
+    except Exception as e:
+        print(f"Error loading YAML file: {e}")
+        return None
+
+# takes in update in the form of:
+# update_glb_scan_string(CLKF_bits=CLKF_bits)
+# 
+def update_glb_scan_string(**kwargs):
+    order_list, default_values, bits_lengths, default_formats = load_from_yaml('glb.yaml')
+    # print("default_values:")
+    # print(default_values)
+    # print("order_list:")
+    # print(order_list)
+    # print("kwargs:")
+    # print(kwargs)
+
+    replacement_var_list = []
+    for name, obj in kwargs.items():
+        if name not in order_list:
+            print(f"Error: {name} not found in order_list. Please check the variable name.")
+        replacement_var_list.append(name)
+
+    glb_scan_str = ''
+    for index, var_name in enumerate(order_list):
+        if (var_name) not in replacement_var_list:
+            temp = reg_bits(default_values[index][var_name], bits_lengths[index][var_name], default_formats[index][var_name])
+            glb_scan_str += temp.binary_str
+        else:
+        #    print(kwargs[var_name].binary_str)
+           glb_scan_str += kwargs[var_name].binary_str 
+
+    return glb_scan_str
+
+
+# CLKF_bits =         reg_bits( '0' * 16 + '10011' + '0000000000' + '0' * 23, 54, 'bin') # 54 bits
+# print(update_glb_scan_string(CLKF_bits=CLKF_bits))
+# print("Length of updated glb scan string: ", len(update_glb_scan_string(CLKF_bits=CLKF_bits)))
 
 def select_subchain(mscan_sel, mode=False):
     # select and update sub chain strings
@@ -1617,14 +1670,15 @@ if __name__ == "__main__":
 
         # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
       
-        mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
+        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
 
         # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
         
         # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
-        mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
+        
+        # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal")
 
-        mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
         
         
 
@@ -1632,7 +1686,7 @@ if __name__ == "__main__":
 
         # time.sleep(10)
 
-        readout_scan_read(comm, mscan_sel="readout", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+        # readout_scan_read(comm, mscan_sel="readout", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
 
         # # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
         

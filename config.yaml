@@ -1,0 +1,170 @@
+# order yaml for config scan bits
+concat_order: 
+  - config_en_alpha_dynb
+  - config_byp_rs_en
+  - sync_load
+  - config_gm_log_en
+  - config_fixed_zt_en
+  - en_roundup
+  - config_gm_log_int_init_en
+  - config_fp_len_en
+  - config_bwr_max_lg
+  - config_bwr_lg
+  - config_alphars_norm
+  - config_alphars_pert
+  - config_fp_len
+  - config_gm_log_int_init
+  - config_gm_log_int
+  - config_gmlg_maxint
+  - config_gmlg_minint
+  - config_fi_log
+  - config_fd_log
+  - config_fullbw_gm_lg
+  - config_fullbw_gm_lg_offset
+  - config_rs_cnt_thres_dft
+  - config_rs_init
+  - config_rs_dec
+  - config_rs_inc
+  - config_rs_max
+  - config_rs_min
+  - config_rs_val
+  - config_fixed_zt
+  - config_zt_max
+  - config_ifcw_init_lg
+  - config_slip_halt_threslg
+  - config_prop_init
+  - config_cnst_max_iupd
+  - config_cnst_min_iupd
+  - config_cnst_max_pupd
+  - config_cnst_min_pupd
+  - config_cnst_max_slip_iupd
+  - config_fp_len_slip
+  - config_lpfltr_dly
+  - config_slip_guard
+  - config_slip_guard_iupd
+  - config_cnst_nominal_nf_lg
+  - config_snapshot_cnt_thres
+  - rs_mask_en
+  - rs_settling_plateau_en
+  - config_rs_mask
+  - config_slip_rs_reset_en
+  - config_rs_reset_threshold
+  - config_rs_settling_plateau
+  - config_ip_diff
+  - config_rs_sp_state_code
+  - config_rs_sp_mask
+  - config_rs_mask_sval
+
+
+default_format:
+  - config_en_alpha_dynb:        'dec'
+  - config_byp_rs_en:            'dec'
+  - sync_load:                   'dec'
+  - config_gm_log_en:            'dec'
+  - config_fixed_zt_en:          'dec'
+  - en_roundup:                  'dec'
+  - config_gm_log_int_init_en:   'dec'
+  - config_fp_len_en:            'dec'
+  - config_bwr_max_lg:           'dec'
+  - config_bwr_lg:               'dec'
+  - config_alphars_norm:         'dec'
+  - config_alphars_pert:         'dec'
+  - config_fp_len:               'dec'
+  - config_gm_log_int_init:      'dec'  
+  - config_gm_log_int:           'dec'
+  - config_gmlg_maxint:          'dec'
+  - config_gmlg_minint:          'dec'
+  - config_fi_log:               'dec'
+  - config_fd_log:               'dec'
+  - config_fullbw_gm_lg:        'dec'
+  - config_fullbw_gm_lg_offset:  'dec'
+  - config_rs_cnt_thres_dft:     'dec'
+  - config_rs_init:              'dec'
+  - config_rs_dec:               'dec'
+  - config_rs_inc:               'dec'
+  - config_rs_max:               'dec'
+  - config_rs_min:               'dec'
+  - config_rs_val:               'dec'
+  - config_fixed_zt:             'dec'
+  - config_zt_max:               'dec'
+  - config_ifcw_init_lg:         'dec'
+  - config_slip_halt_threslg:    'dec'
+  - config_prop_init:            'dec'
+  - config_cnst_max_iupd:       'dec'
+  - config_cnst_min_iupd:       'dec'
+  - config_cnst_max_pupd:       'dec'
+  - config_cnst_min_pupd:       'dec'
+  - config_cnst_max_slip_iupd:  'dec'
+  - config_fp_len_slip:          'dec'
+  - config_lpfltr_dly:           'dec'
+  - config_slip_guard:           'dec'
+  - config_slip_guard_iupd:      'dec'
+  - config_cnst_nominal_nf_lg:  'dec'
+  - config_snapshot_cnt_thres:   'dec'
+  - rs_mask_en:                  'dec'
+  - rs_settling_plateau_en:     'dec'
+  - config_rs_mask:              'dec'
+  - config_slip_rs_reset_en:     'dec'
+  - config_rs_reset_threshold:   'dec'
+  - config_rs_settling_plateau: 'dec'
+  - config_ip_diff:              'dec'
+  - config_rs_sp_state_code:     'dec'
+  - config_rs_sp_mask:          'dec'
+  - config_rs_mask_sval:        'dec'
+
+bits_length:
+  - config_en_alpha_dynb:        1
+  - config_byp_rs_en:            1
+  - sync_load:                   1
+  - config_gm_log_en:            1
+  - config_fixed_zt_en:          1
+  - en_roundup:                  1
+  - config_gm_log_int_init_en:   1
+  - config_fp_len_en:            1
+  - config_bwr_max_lg:          11
+  - config_bwr_lg:              11
+  - config_alphars_norm:        11
+  - config_alphars_pert:        11
+  - config_fp_len:               7
+  - config_gm_log_int_init:      7
+  - config_gm_log_int:           7
+  - config_gmlg_maxint:         7
+  - config_gmlg_minint:         7
+  - config_fi_log:              16
+  - config_fd_log:              16
+  - config_fullbw_gm_lg:        8
+  - config_fullbw_gm_lg_offset: 8
+  - config_rs_cnt_thres_dft:   18
+  - config_rs_init:              8
+  - config_rs_dec:               8
+  - config_rs_inc:               8
+  - config_rs_max:               8
+  - config_rs_min:               8
+  - config_rs_val:               8
+  - config_fixed_zt:            7
+  - config_zt_max:              7
+  - config_ifcw_init_lg:        7
+  - config_slip_halt_threslg:   4
+  - config_prop_init:           7 
+  - config_cnst_max_iupd:      7
+  - config_cnst_min_iupd:      7
+  - config_cnst_max_pupd:      7
+  - config_cnst_min_pupd:      7
+  - config_cnst_max_slip_iupd: 7
+  - config_fp_len_slip:         7
+  - config_lpfltr_dly:          8
+  - config_slip_guard:          7
+  - config_slip_guard_iupd:     7
+  - config_cnst_nominal_nf_lg: 6
+  - config_snapshot_cnt_thres: 13
+  - rs_mask_en:                  1
+  - rs_settling_plateau_en:     1
+  - config_rs_mask:             8
+  - config_slip_rs_reset_en:     1
+  - config_rs_reset_threshold:  8
+  - config_rs_settling_plateau: 8
+  - config_ip_diff:             7
+  - config_rs_sp_state_code:    6
+  - config_rs_sp_mask:         8
+  - config_rs_mask_sval:       8
+

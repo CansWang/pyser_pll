@@ -1,0 +1,182 @@
+# order yaml for glb scan bits
+concat_order:
+  - CLKF_bits
+  - CLKHD_bits
+  - CLKOD_bits
+  - PWRDN_bits
+  - BYPASS_bits
+  - BYPASS_NLK_ENB_bits
+  - TEST_MODE_bits
+  - TESTSEL_bits
+  - LOWFNACC_bits
+  - NOFNACC_bits
+  - PGAIN_LGMLT_bits
+  - IGAIN_LGMLT_bits
+  - IPGAIN_LGMLT_bits
+  - IIGAIN_LGMLT_bits
+  - IBW_NLK_ENB_bits
+  - LOCK_TYPE_bits
+  - LOCK_SEL_bits
+  - FBSEL_bits
+  - VCOCAL_RDIV_LGFCT_bits
+  - VCOCAL_OFFBYP_bits
+  - VCOCAL_ENB_bits
+  - BIAS_REF_SEL_bits
+  - REG_EXT_SEL1
+  - REG_TEST_SEL1
+  - REG_TEST_REP1
+  - REG_TEST_OUT1
+  - REG_TEST_DRV1
+  - REG_RESET1
+  - REG_PWRDN1
+  - BG_RESET1
+  - BG_PWRDN1
+  - REG_EXT_SEL2
+  - REG_TEST_SEL2
+  - REG_TEST_REP2
+  - REG_TEST_OUT2
+  - REG_TEST_DRV2
+  - REG_RESET2
+  - REG_PWRDN2
+  - BG_RESET2
+  - BG_PWRDN2
+  - RSTFNACC_bits
+  - MAX_VCO_BIAS_bits
+  - VCOCAL_OFF_bits
+
+default_format:
+  - CLKF_bits:         'bin'
+  - CLKHD_bits:        'dec'
+  - CLKOD_bits:        'dec'
+  - PWRDN_bits:       'dec'
+  - BYPASS_bits:      'dec'
+  - BYPASS_NLK_ENB_bits: 'dec'
+  - TEST_MODE_bits:   'dec'
+  - TESTSEL_bits:    'dec'
+  - LOWFNACC_bits:   'dec'
+  - NOFNACC_bits:    'dec'
+  - PGAIN_LGMLT_bits: 'dec'
+  - IGAIN_LGMLT_bits: 'bin'
+  - IPGAIN_LGMLT_bits: 'dec'
+  - IIGAIN_LGMLT_bits: 'bin'
+  - IBW_NLK_ENB_bits: 'dec'
+  - LOCK_TYPE_bits:   'dec'
+  - LOCK_SEL_bits:    'dec'
+  - FBSEL_bits:      'dec'
+  - VCOCAL_RDIV_LGFCT_bits: 'dec'
+  - VCOCAL_OFFBYP_bits: 'dec'
+  - VCOCAL_ENB_bits:  'dec'
+  - BIAS_REF_SEL_bits: 'dec'
+  - REG_EXT_SEL1:    'dec'
+  - REG_TEST_SEL1:   'dec'
+  - REG_TEST_REP1:   'dec'
+  - REG_TEST_OUT1:   'dec'
+  - REG_TEST_DRV1:   'dec'
+  - REG_RESET1:     'dec'
+  - REG_PWRDN1:     'dec'
+  - BG_RESET1:      'dec'
+  - BG_PWRDN1:      'dec'
+  - REG_EXT_SEL2:    'dec'
+  - REG_TEST_SEL2:   'dec'
+  - REG_TEST_REP2:   'dec'
+  - REG_TEST_OUT2:   'dec'
+  - REG_TEST_DRV2:   'dec'
+  - REG_RESET2:     'dec'
+  - REG_PWRDN2:     'dec'
+  - BG_RESET2:      'dec'
+  - BG_PWRDN2:      'dec'
+  - RSTFNACC_bits:   'dec'
+  - MAX_VCO_BIAS_bits: 'dec'
+  - VCOCAL_OFF_bits: 'dec'
+
+bits_length:
+  - CLKF_bits:         54
+  - CLKHD_bits:        2
+  - CLKOD_bits:        11
+  - PWRDN_bits:       1
+  - BYPASS_bits:      1
+  - BYPASS_NLK_ENB_bits: 1
+  - TEST_MODE_bits:   1
+  - TESTSEL_bits:    3
+  - LOWFNACC_bits:   1
+  - NOFNACC_bits:    1
+  - PGAIN_LGMLT_bits: 6
+  - IGAIN_LGMLT_bits: 6
+  - IPGAIN_LGMLT_bits: 6
+  - IIGAIN_LGMLT_bits: 6
+  - IBW_NLK_ENB_bits: 1
+  - LOCK_TYPE_bits:   1
+  - LOCK_SEL_bits:    4
+  - FBSEL_bits:      1
+  - VCOCAL_RDIV_LGFCT_bits: 3
+  - VCOCAL_OFFBYP_bits: 1
+  - VCOCAL_ENB_bits:  1
+  - BIAS_REF_SEL_bits: 3
+  - REG_EXT_SEL1:    1
+  - REG_TEST_SEL1:   1
+  - REG_TEST_REP1:   1
+  - REG_TEST_OUT1:   1
+  - REG_TEST_DRV1:   1
+  - REG_RESET1:     1
+  - REG_PWRDN1:     1
+  - BG_RESET1:      1
+  - BG_PWRDN1:      1
+  - REG_EXT_SEL2:    1
+  - REG_TEST_SEL2:   1
+  - REG_TEST_REP2:   1
+  - REG_TEST_OUT2:   1
+  - REG_TEST_DRV2:   1
+  - REG_RESET2:     1
+  - REG_PWRDN2:     1
+  - BG_RESET2:      1
+  - BG_PWRDN2:      1
+  - RSTFNACC_bits:   1
+  - MAX_VCO_BIAS_bits: 1
+  - VCOCAL_OFF_bits: 5
+
+default_values: # binary format
+  - CLKF_bits:         '000000000000000001011000000000000000000000000000000000' # 54 bits
+  - CLKHD_bits:        '3'
+  - CLKOD_bits:        '1'
+  - PWRDN_bits:       '0'
+  - BYPASS_bits:      '0'
+  - BYPASS_NLK_ENB_bits: '0'
+  - TEST_MODE_bits:   '0'
+  - TESTSEL_bits:    '0'
+  - LOWFNACC_bits:   '0'
+  - NOFNACC_bits:    '0'
+  - PGAIN_LGMLT_bits: '1'
+  - IGAIN_LGMLT_bits: '111011'
+  - IPGAIN_LGMLT_bits: '1'
+  - IIGAIN_LGMLT_bits: '111011'
+  - IBW_NLK_ENB_bits: '1'
+  - LOCK_TYPE_bits:   '0'
+  - LOCK_SEL_bits:    '8'
+  - FBSEL_bits:      '1'
+  - VCOCAL_RDIV_LGFCT_bits: '4'
+  - VCOCAL_OFFBYP_bits: '1'
+  - VCOCAL_ENB_bits:  '1'
+  - BIAS_REF_SEL_bits: '4'
+  - REG_EXT_SEL1:    '0'
+  - REG_TEST_SEL1:   '0'
+  - REG_TEST_REP1:   '0'
+  - REG_TEST_OUT1:   '0'
+  - REG_TEST_DRV1:   '0'
+  - REG_RESET1:     '0'
+  - REG_PWRDN1:     '0'
+  - BG_RESET1:      '0'
+  - BG_PWRDN1:      '0'
+  - REG_EXT_SEL2:    '0'
+  - REG_TEST_SEL2:   '1'
+  - REG_TEST_REP2:   '0'
+  - REG_TEST_OUT2:   '1'
+  - REG_TEST_DRV2:   '0'
+  - REG_RESET2:     '0'
+  - REG_PWRDN2:     '0'
+  - BG_RESET2:      '0'
+  - BG_PWRDN2:      '0'
+  - RSTFNACC_bits:   '0'
+  - MAX_VCO_BIAS_bits: '0'
+  - VCOCAL_OFF_bits: '11'
+
+# End of glb.yaml

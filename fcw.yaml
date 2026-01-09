@@ -1,0 +1,11 @@
+# order yaml for fcw scan chain
+concat_order:
+  - fcw
+
+default_format:
+  - fcw: 'bin'
+
+default_values:
+  fcw: '11111111111111111111111111111111111111111'
+
+# end of file: pyser_pll/fcw.yaml
