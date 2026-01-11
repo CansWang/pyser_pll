@@ -3,7 +3,7 @@ from pyser import *
 # this is the test script for testing frequency jump settling time
 
 # if powered up already, set started = True
-started = True
+started = False
 
 # place to change division ratios before power on
 
@@ -12,13 +12,13 @@ started = True
     # the bottom 33 bits are the fractional part
     # the top 21 bits are the integer part 
     #                            integer   fractional part   
-CLKF_bits = reg_bits( '0' * 16 + '01000' + '0000000000' + '0' * 23, 54, 'bin')
+CLKF_bits = reg_bits( '0' * 16 + '01111' + '0000000000' + '0' * 23, 54, 'bin')
 
     # Additional divider settings for the low speed output clocks
 CLKOD_bits = reg_bits( '1', 11, 'dec' )
 
 # update the GLB scan bits
-glb_complete, glb_complete_reset, glb_complete_bgpwrdn = update_all_glb_scan_bits(CLKF_bits=CLKF_bits, CLKOD_bits=CLKOD_bits)
+# glb_complete, glb_complete_reset, glb_complete_bgpwrdn = update_all_glb_scan_bits(CLKF_bits=CLKF_bits, CLKOD_bits=CLKOD_bits)
 
 
 # change the variable in config scan chain if needed
@@ -56,14 +56,11 @@ if comm.connect(): # connect the uart
         power_on(comm, config_complete, config_complete_reset, glb_complete, glb_complete_reset, glb_complete_bgpwrdn)
         print("上电完成")
 
-    glb_writer_after_por(comm, glb_complete)
-        
-    control_reset_release(comm, config_complete, config_complete_reset)
-    print("释放控制环路复位...")
     # release the control loop reset
 
-    # readout important parameter
-    # readout(comm)
+
+
+
 
     # disconnect the uart
     time.sleep(1)

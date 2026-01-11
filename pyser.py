@@ -383,8 +383,8 @@ glb_complete_bgpwrdn = CLKF_bits.binary_str + \
             VCOCAL_OFF_bits.binary_str
         
 
-print("the length of glb_complete: ", len(glb_complete))
-print("the length of glb_complete_reset: ", len(glb_complete_reset))
+# print("the length of glb_complete: ", len(glb_complete))
+# print("the length of glb_complete_reset: ", len(glb_complete_reset))
 
 
 # design vairbale value
@@ -560,7 +560,13 @@ config_ip_diff.binary_str + \
 config_rs_sp_state_code.binary_str + \
 config_rs_sp_mask.binary_str + \
 config_rs_mask_sval.binary_str
-print("config_complete length: ", len(config_complete))
+# print("config_complete length: ", len(config_complete))
+
+
+
+# def update_all_config_scan_bits(**kwargs):
+    
+
 
 # scan read reg_bits definition
 chip_id =                       reg_bits('0',   10,     'dec') # 8 bits
@@ -608,7 +614,7 @@ scan_out_zt.binary_str
 
 scanread_complete = '10' * 122
 
-print("scanread_complete length: ", len(scanread_complete))
+# print("scanread_complete length: ", len(scanread_complete))
 # concat
 
 # size of each scan chian (rtl design)
@@ -630,12 +636,12 @@ def invert_binary_string(bin_str): # bitwise invert of a binary string
     inverted = ''.join('1' if bit == '0' else '0' for bit in bin_str)
     return inverted
 
-last_byte = "00110101" 
-last_byte_inv = invert_binary_string(last_byte)
-print(last_byte_inv)
+# last_byte = "00110101" 
+# last_byte_inv = invert_binary_string(last_byte)
+# print(last_byte_inv)
 # control_stream = "00110101" + last_byte + last_byte * 2 + "0101"
 # control_stream = "00110101" + "01010101"+ "010" + "00100" + "00110101" + "01010100" + "010"
-control_stream = "00110001" + "01010100" + "000"
+# control_stream = "00110001" + "01010100" + "000"
 
 # control_stream = "00110101" + "01010101"+ "010" 
 # control_stream = "01111101" * 15
@@ -685,9 +691,9 @@ def load_from_yaml(path):
 
 # takes in update in the form of:
 # update_glb_scan_string(CLKF_bits=CLKF_bits)
-# 
-def update_glb_scan_string(**kwargs):
-    order_list, default_values, bits_lengths, default_formats = load_from_yaml('glb.yaml')
+
+def update_scan_string(yaml_path, **kwargs):
+    order_list, default_values, bits_lengths, default_formats = load_from_yaml(yaml_path)
     # print("default_values:")
     # print(default_values)
     # print("order_list:")
@@ -696,21 +702,116 @@ def update_glb_scan_string(**kwargs):
     # print(kwargs)
 
     replacement_var_list = []
-    for name, obj in kwargs.items():
-        if name not in order_list:
-            print(f"Error: {name} not found in order_list. Please check the variable name.")
-        replacement_var_list.append(name)
+    if kwargs:
+        for name, obj in kwargs.items():
+            if name not in order_list:
+                print(f"Error: {name} not found in order_list. Please check the variable name.")
+            replacement_var_list.append(name)
 
+    
     glb_scan_str = ''
     for index, var_name in enumerate(order_list):
         if (var_name) not in replacement_var_list:
+            # print(var_name)
             temp = reg_bits(default_values[index][var_name], bits_lengths[index][var_name], default_formats[index][var_name])
+            # total_str_len += bits_lengths[index][var_name]
             glb_scan_str += temp.binary_str
+            # print("var_name not in replacement_var_list: ", var_name)
+            # print("length: ", bits_lengths[index][var_name])
         else:
+            # total_str_len += len(kwargs[var_name].binary_str)
+            # print("var_name in replacement_var_list: ", var_name)
+            # print("length: ", len(kwargs[var_name].binary_str))
         #    print(kwargs[var_name].binary_str)
-           glb_scan_str += kwargs[var_name].binary_str 
+            glb_scan_str += kwargs[var_name].binary_str 
 
+    # print("Total glb scan string length: ")
+    # print(total_str_len)
     return glb_scan_str
+
+def update_all_glb_scan_bits(**kwargs):
+    # update the main glb value
+    glb_complete_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
+    print(glb_complete_local)
+
+    kwargs['REG_RESET1'] = reg_bits('1', 1, 'dec')
+    kwargs['REG_PWRDN1'] = reg_bits('0', 1, 'dec')
+    kwargs['BG_RESET1'] = reg_bits('0', 1, 'dec') 
+    kwargs['BG_PWRDN1'] = reg_bits('0', 1, 'dec')   
+
+    kwargs['REG_RESET2'] = reg_bits('1', 1, 'dec')
+    kwargs['REG_PWRDN2'] = reg_bits('0', 1, 'dec')
+    kwargs['BG_RESET2'] = reg_bits('0', 1, 'dec') 
+    kwargs['BG_PWRDN2'] = reg_bits('0', 1, 'dec') 
+    
+    # update the reset glb value
+    glb_complete_reset_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
+    print(glb_complete_reset_local)
+
+    
+    kwargs['REG_RESET1'] = reg_bits('0', 1, 'dec')
+    kwargs['REG_PWRDN1'] = reg_bits('1', 1, 'dec')
+    kwargs['BG_RESET1'] = reg_bits('0', 1, 'dec') 
+    kwargs['BG_PWRDN1'] = reg_bits('1', 1, 'dec')   
+
+    kwargs['REG_RESET2'] = reg_bits('0', 1, 'dec')
+    kwargs['REG_PWRDN2'] = reg_bits('1', 1, 'dec')
+    kwargs['BG_RESET2'] = reg_bits('0', 1, 'dec') 
+    kwargs['BG_PWRDN2'] = reg_bits('1', 1, 'dec') 
+    print(kwargs)
+    # update the bgpwrdn glb value
+    glb_complete_bgpwrdn_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
+    print(glb_complete_bgpwrdn_local)
+
+    return glb_complete_local, glb_complete_reset_local, glb_complete_bgpwrdn_local
+
+def update_all_config_scan_bits(**kwargs):
+    # update the main config value
+    config_complete_local = update_scan_string(yaml_path='config.yaml', **kwargs)
+    # print(config_complete_local)
+
+    kwargs['sync_load'] = reg_bits('0', 1, 'dec')
+
+    # update the reset config value
+    config_complete_reset_local = update_scan_string(yaml_path='config.yaml', **kwargs)
+    # print(config_complete_reset_local)
+
+    return config_complete_local, config_complete_reset_local
+
+
+# call this script to execute the power on sequence
+def power_on(comm, config_data_bits, config_data_bits_reset, glb_data_bits, glb_data_bits_reset, glb_data_bits_bgpwrdn):
+
+    # write init value into config scan chain
+    mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
+
+    # glb power down
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0",  vcal_control_bits="000", scan_load_1bit="0", mode="bgpwrdn",data_bits=glb_data_bits_bgpwrdn)
+
+    # glb power on
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits)
+
+    # glb reset 
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=glb_data_bits_reset)
+
+    # glb release reset
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits)
+
+
+def control_reset_release(comm, config_data_bits, config_data_bits_reset):
+
+    # config reset
+    # relaease controller reset
+    mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
+
+    # relaease controller reset
+    mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits)
+
+def glb_writer_after_por(comm, glb_data_bits):
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits)
+
+def readout(comm):
+    readout_scan_read(comm, mscan_sel="readscan", glb_control_bits="011", config_control_bits="000", fcw_control_bits="000", readout_control_bits="1", vcal_control_bits="000", scan_load_1bit="0")
 
 
 # CLKF_bits =         reg_bits( '0' * 16 + '10011' + '0000000000' + '0' * 23, 54, 'bin') # 54 bits
@@ -1342,7 +1443,7 @@ def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_b
 
 
 # this function only write the master scan chain with desired control bits of 
-def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0", mode="normal"): # add selection of sub chain bits later
+def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0", mode=None, data_bits=None): # add selection of sub chain bits later
 
     if (mscan_sel == "bypass"):
         mscan_sel_bits = "00000"
@@ -1387,7 +1488,8 @@ def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bit
     toggle_en_mscan(obj)
     print("HOST: MSCAN Latch toggled. Setting bypass to 0 and writing to sub scan chain...")
     # sub_chain_data_bits = select_subchain(mscan_sel)[::-1]
-    sub_chain_data_bits = select_subchain(mscan_sel, mode=mode)
+    # sub_chain_data_bits = select_subchain(mscan_sel, mode=mode)
+    sub_chain_data_bits = data_bits
 
     # set bypass = 0
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=0)
@@ -1638,11 +1740,11 @@ def readout_scan_read(obj, mscan_sel, glb_control_bits="001", config_control_bit
 # if chip_scan_chain_inv in "001101010011010100110101001101010101":
 #     print("Found the chip scan chain in the control stream!")
 # Usage example
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    comm = AdvancedMicroBlazeComm(port='COM3', baudrate=9600)  # make port connection
+#     comm = AdvancedMicroBlazeComm(port='COM3', baudrate=9600)  # make port connection
 
-    if comm.connect(): # connect the uart 
+#     if comm.connect(): # connect the uart 
 
         # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
 
@@ -1690,37 +1792,5 @@ if __name__ == "__main__":
 
         # # mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
         
-        
-
-        try:
-                    
-            # Interactive sending
-            # print("💬 Type messages to send (press Ctrl+C to exit):")
-            # print("Printing message in binary: ", control_stream)
-            # user_input_str, last_byte_offset = binary_to_string_safe(control_stream) # concat the last byte offset to the string later
-            # user_input = user_input_str
-            # print("Message to be sent: ", user_input)
-            # print("Message to be sent: ", repr(user_input))
-            # print(user_input)
-            # comm.send_data(user_input + "\n\r")
-            # data, remaning = comm.read_until_sequence(terminator="\n\r\n\r", timeout=10)
-            # print(repr(data))
-            # print("The type of the readback data is : ", type(data))
-            # print("The ascii encoding of the readback data is : ", data)
-            # 
-            # readback_str_inv = repr("".join((chr(int(data[i:i+2], 16)) for i in range(4, len(data), 2)))).strip("'\"")
-            # readback_str = readback_str_inv[::-1]
-            # print(readback_str_inv) # convert hex string to binary string
-            # print("The readback of the sent string is :" , readback_str) # invert the string
-
-            # print(repr(remaning))
-            time.sleep(10)
-            # print("Received data:")
-
-        except Exception as e:
-            print(f"Error: {e}")
-            traceback.print_exc()
-        finally:
-            comm.disconnect()
 
 
