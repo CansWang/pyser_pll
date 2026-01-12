@@ -732,7 +732,7 @@ def update_scan_string(yaml_path, **kwargs):
 def update_all_glb_scan_bits(**kwargs):
     # update the main glb value
     glb_complete_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
-    print(glb_complete_local)
+    # print(glb_complete_local)
 
     kwargs['REG_RESET1'] = reg_bits('1', 1, 'dec')
     kwargs['REG_PWRDN1'] = reg_bits('0', 1, 'dec')
@@ -746,7 +746,7 @@ def update_all_glb_scan_bits(**kwargs):
     
     # update the reset glb value
     glb_complete_reset_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
-    print(glb_complete_reset_local)
+    # print(glb_complete_reset_local)
 
     
     kwargs['REG_RESET1'] = reg_bits('0', 1, 'dec')
@@ -758,10 +758,10 @@ def update_all_glb_scan_bits(**kwargs):
     kwargs['REG_PWRDN2'] = reg_bits('1', 1, 'dec')
     kwargs['BG_RESET2'] = reg_bits('0', 1, 'dec') 
     kwargs['BG_PWRDN2'] = reg_bits('1', 1, 'dec') 
-    print(kwargs)
+    # print(kwargs)
     # update the bgpwrdn glb value
     glb_complete_bgpwrdn_local = update_scan_string(yaml_path='glb.yaml', **kwargs)
-    print(glb_complete_bgpwrdn_local)
+    # print(glb_complete_bgpwrdn_local)
 
     return glb_complete_local, glb_complete_reset_local, glb_complete_bgpwrdn_local
 
@@ -802,13 +802,13 @@ def control_reset_release(comm, config_data_bits, config_data_bits_reset):
 
     # config reset
     # relaease controller reset
-    mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
+    # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
 
-    # relaease controller reset
+    # release controller reset
     mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits)
 
-def glb_writer_after_por(comm, glb_data_bits):
-    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits)
+def glb_writer_after_por(comm, glb_data_bits, trigger_enable=0):
+    mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits, trigger_enable=trigger_enable)
 
 def readout(comm):
     readout_scan_read(comm, mscan_sel="readscan", glb_control_bits="011", config_control_bits="000", fcw_control_bits="000", readout_control_bits="1", vcal_control_bits="000", scan_load_1bit="0")
@@ -874,13 +874,19 @@ def change_test_var_to_zero():
 
 # control byte, forming 
 
-def form_control_byte(scan_enable, scan_bypass, num_of_bits): # add other control bits later if needed
-    control_byte = ''
+def form_control_byte(scan_enable, scan_bypass, num_of_bits, trigger_enable=0): # add other control bits later if needed
+    
     if (num_of_bits > 1024):
         print("Error: num_of_bits exceeds 1024 bits limit.")
         return None
     # the first four bits are reserved for last byte offset
-    control_byte += format(num_of_bits, '012b')
+    if trigger_enable==1:
+        control_byte = '1'
+        control_byte += format(num_of_bits, '011b')
+    else:
+        control_byte = ''
+        control_byte += format(num_of_bits, '012b')
+    
     control_byte += '00'
     # scan_enable bit
     if scan_enable:
@@ -1266,8 +1272,8 @@ def write_scan_chain(obj, scan_byp, current_scan_chain_data, last_byte_offset):
 
 # might need a dedicated bypass writer function both in python and microblaze controller
 
-def mscan_en_bypass_writer(obj, scan_enable, scan_bypass):
-    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=0)
+def mscan_en_bypass_writer(obj, scan_enable, scan_bypass, trigger_enable=0):
+    control_byte = form_control_byte(scan_enable=scan_enable, scan_bypass=scan_bypass, num_of_bits=0, trigger_enable=trigger_enable)
     control_byte_hex, num = binary_to_string_safe(control_byte)
     sent_string = control_byte_hex 
     obj.send_data(sent_string)
@@ -1369,7 +1375,7 @@ def toggle_en_mscan(obj):
     mscan_en_bypass_writer(obj, scan_enable=1, scan_bypass=1)
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
 
-def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0"):
+def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0", trigger_enable=0):
     # toggle the enable of the sub chain
     if mscan_sel == "bypass":
         print("Bypass selected, no sub chain to toggle.")
@@ -1425,7 +1431,7 @@ def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_b
 
     # toggle mscan enable
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
-    mscan_en_bypass_writer(obj, scan_enable=1, scan_bypass=1)
+    mscan_en_bypass_writer(obj, scan_enable=1, scan_bypass=1, trigger_enable=trigger_enable)
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
 
     # write back with enable = 1
@@ -1443,7 +1449,7 @@ def toggle_sub_chain_en(obj, mscan_sel, glb_control_bits="001", config_control_b
 
 
 # this function only write the master scan chain with desired control bits of 
-def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0", mode=None, data_bits=None): # add selection of sub chain bits later
+def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0", mode=None, data_bits=None, trigger_enable=0): # add selection of sub chain bits later
 
     if (mscan_sel == "bypass"):
         mscan_sel_bits = "00000"
@@ -1530,7 +1536,7 @@ def mscan_writer_only(obj, mscan_sel, glb_control_bits="001", config_control_bit
     mscan_en_bypass_writer(obj, scan_enable=0, scan_bypass=1)
     print("HOST: Bypass set to 1.")
 
-    toggle_sub_chain_en(obj, mscan_sel, glb_control_bits, config_control_bits, fcw_control_bits, readout_control_bits, vcal_control_bits, scan_load_1bit)
+    toggle_sub_chain_en(obj, mscan_sel, glb_control_bits, config_control_bits, fcw_control_bits, readout_control_bits, vcal_control_bits, scan_load_1bit, trigger_enable=trigger_enable)
 
 
 def toggle_scan_load(obj, mscan_sel, glb_control_bits="001", config_control_bits="001", fcw_control_bits="001", readout_control_bits="0", vcal_control_bits="001", scan_load_1bit="0"):
@@ -1742,10 +1748,10 @@ def readout_scan_read(obj, mscan_sel, glb_control_bits="001", config_control_bit
 # Usage example
 # if __name__ == "__main__":
 
-#     comm = AdvancedMicroBlazeComm(port='COM3', baudrate=9600)  # make port connection
+# comm = AdvancedMicroBlazeComm(port='COM3', baudrate=9600)  # make port connection
+# if comm.connect(): # connect the uart 
 
-#     if comm.connect(): # connect the uart 
-
+#     mscan_en_bypass_writer(comm, scan_enable=0, scan_bypass=0, trigger_enable=1)
         # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset")
 
         # mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="000", fcw_control_bits="011", readout_control_bits="0",  vcal_control_bits="000", scan_load_1bit="0", mode="bgpwrdn")
