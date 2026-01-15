@@ -13,7 +13,7 @@ started = True
     # the bottom 33 bits are the fractional part
     # the top 21 bits are the integer part 
     #                            integer   fractional part   
-CLKF_bits = reg_bits( '0' * 16 + '01100' + '0000001000' + '0' * 23, 54, 'bin')
+CLKF_bits = reg_bits( '0' * 16 + '01010' + '0000000000' + '0' * 23, 54, 'bin')
 
     # Additional divider settings for the low speed output clocks
 CLKOD_bits = reg_bits( '0', 11, 'dec' )
@@ -23,20 +23,15 @@ glb_complete, glb_complete_reset, glb_complete_bgpwrdn = update_all_glb_scan_bit
 
 
 # change the variable in config scan chain if needed
-config_byp_rs_en = reg_bits('0', 1, 'dec')  # bypass the right shift value
-config_rs_cnt_thres_dft =       reg_bits('25',   18,   'dec')  
+config_byp_rs_en = reg_bits('1', 1, 'dec')  # bypass the right shift value
+config_rs_cnt_thres_dft =       reg_bits('127',   18,   'dec')  
 config_rs_dec =                 reg_bits('1',   8,    'dec')
 config_rs_inc =                 reg_bits('1',   8,    'dec')
 config_fi_log = reg_bits('512', 16, 'dec') 
 config_fd_log = reg_bits('2048', 16, 'dec') 
-rs_mask_en = reg_bits('0', 1, 'dec')
-config_rs_val =      reg_bits('3',   8,   'dec')
-config_rs_mask =     reg_bits('6',   8,   'dec')
-rs_settling_plateau_en = reg_bits('0', 1, 'dec')
-config_rs_sp_state_code =      reg_bits('16',   6,   'dec')
-
+config_rs_val =      reg_bits('2',   8,   'dec')
 # update config scan chain
-config_complete, config_complete_reset = update_all_config_scan_bits(config_byp_rs_en=config_byp_rs_en, config_rs_cnt_thres_dft=config_rs_cnt_thres_dft, config_rs_dec=config_rs_dec, config_rs_inc=config_rs_inc, config_fi_log=config_fi_log, config_fd_log=config_fd_log, rs_mask_en=rs_mask_en, config_rs_sp_state_code=config_rs_sp_state_code)
+config_complete, config_complete_reset = update_all_config_scan_bits(config_byp_rs_en=config_byp_rs_en, config_rs_cnt_thres_dft=config_rs_cnt_thres_dft, config_rs_dec=config_rs_dec, config_rs_inc=config_rs_inc, config_fi_log=config_fi_log, config_fd_log=config_fd_log)
 
 # print("Config Scan String        :", config_complete)
 # print("Config Reset Scan String  :", config_complete_reset)
@@ -72,13 +67,7 @@ if comm.connect(): # connect the uart
     control_reset_release(comm, config_complete, config_complete_reset)
     glb_writer_after_por(comm, glb_complete, trigger_enable=0)
 
-    config_rs_cnt_thres_dft =       reg_bits('25',   18,   'dec')
-
-    config_complete, config_complete_reset = update_all_config_scan_bits(config_byp_rs_en=config_byp_rs_en, config_rs_cnt_thres_dft=config_rs_cnt_thres_dft, config_rs_dec=config_rs_dec, config_rs_inc=config_rs_inc, config_fi_log=config_fi_log, config_fd_log=config_fd_log, rs_mask_en=rs_mask_en, config_rs_sp_state_code=config_rs_sp_state_code)
-
-    control_reset_release(comm, config_complete, config_complete_reset)
-
-    CLKF_bits = reg_bits( '0' * 16 + '00101' + '0000001000' + '0' * 23, 54, 'bin')
+    CLKF_bits = reg_bits( '0' * 16 + '01110' + '0000000000' + '0' * 23, 54, 'bin')
 
     # Additional divider settings for the low speed output clocks
     CLKOD_bits = reg_bits( '0', 11, 'dec' )
@@ -87,8 +76,7 @@ if comm.connect(): # connect the uart
     glb_complete, glb_complete_reset, glb_complete_bgpwrdn = update_all_glb_scan_bits(CLKF_bits=CLKF_bits, CLKOD_bits=CLKOD_bits)
     glb_writer_after_por(comm, glb_complete, trigger_enable=1)
 
-    # readout the status registers
-    readout_scan_read(comm, mscan_sel="readout", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
+
     # disconnect the uart
     time.sleep(1)
     comm.disconnect()

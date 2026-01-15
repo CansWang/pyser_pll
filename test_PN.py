@@ -15,7 +15,7 @@ started = True
     # the bottom 33 bits are the fractional part
     # the top 21 bits are the integer part 
     #                            integer   fractional part   
-CLKF_bits = reg_bits( '0' * 16 + '00100' + '0000000000' + '0' * 23, 54, 'bin')
+CLKF_bits = reg_bits( '0' * 16 + '00101' + '0000001000' + '0' * 23, 54, 'bin')
     # feedback division ratio  = CLKF
     # Additional divider settings for the low speed output clocks
 
@@ -33,9 +33,18 @@ glb_complete, glb_complete_reset, glb_complete_bgpwrdn = update_all_glb_scan_bit
 config_byp_rs_en = reg_bits('0', 1, 'dec')  # bypass the right shift value, active high
 
 # setting the bandwidth 
-config_fi_log = reg_bits('2048', 16, 'dec') 
+config_fi_log = reg_bits('512', 16, 'dec') 
 config_fd_log = reg_bits('2048', 16, 'dec') 
+config_rs_cnt_thres_dft =       reg_bits('25',   18,   'dec')  
+config_rs_dec =                 reg_bits('1',   8,    'dec')
+config_rs_inc =                 reg_bits('1',   8,    'dec')
 
+
+rs_mask_en = reg_bits('0', 1, 'dec')
+config_rs_val =      reg_bits('3',   8,   'dec')
+config_rs_mask =     reg_bits('6',   8,   'dec')
+rs_settling_plateau_en = reg_bits('0', 1, 'dec')
+config_rs_sp_state_code =      reg_bits('16',   6,   'dec')
 
 # update config scan chain
 config_complete, config_complete_reset = update_all_config_scan_bits(config_byp_rs_en=config_byp_rs_en, config_fi_log=config_fi_log, config_fd_log=config_fd_log)
@@ -77,7 +86,7 @@ if comm.connect(): # connect the uart
 
     # readout important parameter
     # readout(comm)
-
+    readout_scan_read(comm, mscan_sel="readout", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0")
     # disconnect the uart
     time.sleep(1)
     comm.disconnect()
