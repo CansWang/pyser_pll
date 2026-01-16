@@ -807,11 +807,26 @@ def control_reset_release(comm, config_data_bits, config_data_bits_reset):
     # release controller reset
     mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits)
 
+def control_reset_assert(comm, config_data_bits, config_data_bits_reset):
+
+    # config reset
+    # relaease controller reset
+    # mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
+
+    # release controller reset
+    mscan_writer_only(comm, mscan_sel="config", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="reset", data_bits=config_data_bits_reset)
+
 def glb_writer_after_por(comm, glb_data_bits, trigger_enable=0):
     mscan_writer_only(comm, mscan_sel="glb", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", mode="normal", data_bits=glb_data_bits, trigger_enable=trigger_enable)
 
 def readout(comm):
     readout_scan_read(comm, mscan_sel="readscan", glb_control_bits="011", config_control_bits="011", fcw_control_bits="000", readout_control_bits="1", vcal_control_bits="000", scan_load_1bit="0")
+
+def free_running_readout_mode(comm):
+    readout_scan_read(comm, mscan_sel="readscan", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="1", vcal_control_bits="000", scan_load_1bit="0")
+
+def free_running_set_fcw(comm, fcw_value):
+    mscan_writer_only(comm, mscan_sel="fcw", glb_control_bits="011", config_control_bits="011", fcw_control_bits="011", readout_control_bits="0", vcal_control_bits="000", scan_load_1bit="0", data_bits=fcw_value)
 
 
 # CLKF_bits =         reg_bits( '0' * 16 + '10011' + '0000000000' + '0' * 23, 54, 'bin') # 54 bits
